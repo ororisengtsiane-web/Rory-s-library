@@ -1,0 +1,80 @@
+{% extends "library/base.html" %}
+
+{% block title %}Home | Rory's Library{% endblock %}
+
+{% block content %}
+<style>
+  .library-heading { margin-bottom: 1.5rem; }
+  .library-heading h2 { margin-bottom: .35rem; }
+  .library-search { margin: 1.5rem 0 2rem; padding: 1rem; background: #f5f6fb; border-radius: 14px; }
+  .library-search button { padding: .55rem 1rem; border: 0; border-radius: 8px; background: #4b3b8f; color: white; cursor: pointer; }
+  .book-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; margin: 1.5rem 0; }
+  .book-card { min-width: 0; overflow: hidden; border: 1px solid #e7e5ee; border-radius: 16px; background: #fff; box-shadow: 0 5px 18px rgba(25, 20, 55, .08); }
+  .book-cover-link { display: block; background: #efedf7; }
+  .book-cover { display: block; width: 100%; aspect-ratio: 2 / 3; object-fit: cover; }
+  .book-cover-placeholder { aspect-ratio: 2 / 3; display: flex; justify-content: center; align-items: center; text-align: center; padding: 1rem; box-sizing: border-box; background: linear-gradient(145deg, #44357d, #9c80c8); color: white; font-size: 1.15rem; font-weight: 700; }
+  .book-info { padding: 1rem; }
+  .book-info h3 { margin: 0 0 .35rem; font-size: 1.1rem; line-height: 1.35; }
+  .book-info h3 a { color: #292047; text-decoration: none; }
+  .book-author, .book-genre { margin: .3rem 0; color: #625d71; }
+  .book-status { margin: .7rem 0; font-weight: 600; }
+  .book-actions { display: flex; flex-wrap: wrap; gap: .65rem; margin-top: 1rem; }
+  .book-actions a { color: #4b3b8f; font-weight: 600; text-decoration: none; }
+  .book-actions a:first-child { padding: .5rem .7rem; border-radius: 8px; background: #4b3b8f; color: white; }
+  .library-pagination { display: flex; align-items: center; justify-content: center; gap: 1rem; margin: 2rem 0; flex-wrap: wrap; }
+  @media (max-width: 850px) { .book-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 520px) { .book-grid { grid-template-columns: 1fr; } }
+</style>
+
+<div class="library-heading">
+  <h2>Welcome to Rory's Library!</h2>
+  <p>Explore our collection and discover your next favourite read.</p>
+</div>
+
+<form class="library-search" method="get" action="{% url 'home' %}">
+  {{ search_form.as_p }}
+  <button type="submit">Search / Filter</button>
+  <a href="{% url 'home' %}">Clear</a>
+</form>
+
+{% if books %}
+  <div class="book-grid">
+    {% for book in books %}
+      <article class="book-card">
+        <a class="book-cover-link" href="{% url 'book_detail' book.pk %}" aria-label="View {{ book.title }}">
+          {% if book.cover_image %}
+            <img class="book-cover" src="{{ book.cover_image.url }}" alt="Cover of {{ book.title }}" loading="lazy">
+          {% else %}
+            <div class="book-cover-placeholder">{{ book.title }}</div>
+          {% endif %}
+        </a>
+        <div class="book-info">
+          <h3><a href="{% url 'book_detail' book.pk %}">{{ book.title }}</a></h3>
+          <p class="book-author">By {% if book.author %}{{ book.author.name }}{% else %}Unknown author{% endif %}</p>
+          <p class="book-genre">{{ book.get_genre_display }}</p>
+          <p class="book-status">{% if book.is_available %}Available{% else %}Unavailable{% endif %}</p>
+          <div class="book-actions">
+            <a href="{% url 'book_detail' book.pk %}">View Details</a>
+            <a href="{% url 'edit_book' book.pk %}">Edit</a>
+            <a href="{% url 'delete_book' book.pk %}">Delete</a>
+          </div>
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+{% else %}
+  <p>No books match your search yet.</p>
+{% endif %}
+
+{% if page_obj.paginator.num_pages > 1 %}
+  <nav class="library-pagination" aria-label="Pagination">
+    {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}{% if query_params %}&amp;{{ query_params }}{% endif %}">Previous</a>
+    {% endif %}
+    <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}{% if query_params %}&amp;{{ query_params }}{% endif %}">Next</a>
+    {% endif %}
+  </nav>
+{% endif %}
+{% endblock %}

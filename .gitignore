@@ -1,0 +1,17 @@
+myenv/
+__pycache__/
+*.pyc
+db.sqlite3
+# Virtual environments
+carbid_env/
+myvenv/
+.venv/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Local configuration
+*.sqlite3
+.pytest_cache/

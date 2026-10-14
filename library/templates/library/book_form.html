@@ -1,0 +1,19 @@
+{% extends "library/base.html" %}
+
+{% block title %}Add a Book | Rory's Library{% endblock %}
+
+{% block content %}
+
+    <h2>{% if book %}Edit Book{% else %}Add a New Book{% endif %}</h2>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button type="submit">Save Book</button>
+    </form>
+
+    <p><a href="{% url 'home' %}">Cancel and Return Home</a></p>
+
+{% endblock %}
