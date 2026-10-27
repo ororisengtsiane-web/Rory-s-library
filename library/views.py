@@ -1,14 +1,17 @@
 from django.shortcuts import render
 from django.views.generic import DetailView, UpdateView, DeleteView
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from .models import Book
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import BookForm, BookSearchForm
+from .forms import BookForm, BookSearchForm, RegisterForm
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import JsonResponse
 from django.contrib import messages
 from django.views.decorators.http import require_POST
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth import login
+from django.contrib.auth.models import Group
 
 def home(request):
     books = Book.objects.select_related("author", "publisher").all()
@@ -36,6 +39,8 @@ class BookDetailView(DetailView):
     template_name = "library/book_detail.html"
     context_object_name = "book"
 
+@login_required
+@permission_required("library.add_book", raise_exception=True)
 def add_book(request):
     if request.method == "POST":
         form = BookForm(request.POST, request.FILES)
@@ -51,14 +56,18 @@ def add_book(request):
         "form": form
     })
 
-class BookUpdateView(UpdateView):
+class BookUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    permission_required = "library.change_book"
+    raise_exception = False
     model = Book
     form_class = BookForm
     template_name = "library/book_form.html"
     context_object_name = "book"
     success_url = "/"
 
-class BookDeleteView(DeleteView):
+class BookDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    permission_required = "library.delete_book"
+    raise_exception = False
     model = Book
     template_name = "library/book_confirm_delete.html"
     context_object_name = "book"
@@ -87,9 +96,32 @@ def book_search_ajax(request):
 
 
 @login_required
+@permission_required("library.change_book", raise_exception=True)
 @require_POST
 def book_toggle_availability(request, pk):
     book = get_object_or_404(Book, pk=pk)
     book.is_available = not book.is_available
     book.save(update_fields=["is_available"])
     return JsonResponse({"success": True, "is_available": book.is_available})
+
+
+# Chapter 4: account registration and profile
+def register(request):
+    if request.user.is_authenticated:
+        return redirect('book-list')
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            member, _ = Group.objects.get_or_create(name='Member')
+            user.groups.add(member)
+            login(request, user)
+            messages.success(request, f'Welcome, {user.username}!')
+            return redirect('book-list')
+    else:
+        form = RegisterForm()
+    return render(request, 'library/register.html', {'form': form})
+
+@login_required
+def profile(request):
+    return render(request, 'library/profile.html')

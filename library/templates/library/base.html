@@ -14,8 +14,15 @@ body{font-family:system-ui,Arial,sans-serif;max-width:960px;margin:30px auto;pad
         <h1>Rory's Library</h1>
         <nav>
         <a href="{% url 'home' %}">Home</a>
-        <a href="{% url 'add_book' %}">Add Book</a>
+        {% if perms.library.add_book %}<a href="{% url 'add_book' %}">Add Book</a>{% endif %}
         <a href="{% url 'book-list' %}">Catalogue</a>
+          {% if user.is_authenticated %}
+            <a href="{% url 'profile' %}">My Profile ({{ user.username }})</a>
+            <form action="{% url 'logout' %}" method="post" style="display:inline">{% csrf_token %}<button type="submit">Logout</button></form>
+          {% else %}
+            <a href="{% url 'login' %}">Login</a>
+            <a href="{% url 'register' %}">Register</a>
+          {% endif %}
         </nav>
         <hr>
     </header>

@@ -26,6 +26,8 @@
         <p><strong>ISBN:</strong> {{ book.isbn }}</p>
     {% endif %}
 
+    {% if perms.library.change_book %}<a href="{% url 'edit_book' book.pk %}">Edit</a>{% endif %}
+    {% if perms.library.delete_book %}<a href="{% url 'delete_book' book.pk %}">Delete</a>{% endif %}
     <p><a href="{% url 'home' %}">Back to Home</a></p>
 
 {% endblock %}

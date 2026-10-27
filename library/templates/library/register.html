@@ -1,0 +1,3 @@
+{% extends "library/base.html" %}
+{% block title %}Register | Rory's Library{% endblock %}
+{% block content %}<h2>Create an account</h2><p>New accounts receive the Member role.</p><form method="post">{% csrf_token %}{{ form.as_p }}<button type="submit">Register</button></form><p>Already registered? <a href="{% url 'login' %}">Login</a></p>{% endblock %}

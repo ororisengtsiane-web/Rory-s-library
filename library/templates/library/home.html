@@ -55,8 +55,8 @@
           <p class="book-status">{% if book.is_available %}Available{% else %}Unavailable{% endif %}</p>
           <div class="book-actions">
             <a href="{% url 'book_detail' book.pk %}">View Details</a>
-            <a href="{% url 'edit_book' book.pk %}">Edit</a>
-            <a href="{% url 'delete_book' book.pk %}">Delete</a>
+            {% if perms.library.change_book %}<a href="{% url 'edit_book' book.pk %}">Edit</a>{% endif %}
+            {% if perms.library.delete_book %}<a href="{% url 'delete_book' book.pk %}">Delete</a>{% endif %}
           </div>
         </div>
       </article>

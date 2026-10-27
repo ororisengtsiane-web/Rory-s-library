@@ -134,3 +134,8 @@ MAILERS = {
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+# Chapter 4: authentication routes
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'book-list'
+LOGOUT_REDIRECT_URL = 'book-list'
